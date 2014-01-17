@@ -1,8 +1,6 @@
 import lexer
-import type
-
+import tys
 #AST node
-from src.type import Type
 
 
 class Node(object):
@@ -112,7 +110,7 @@ class Arith(Op):
         self.tok = tok
         self.exp1 = x1
         self.exp2 = x2
-        self.type = type.Type.max(x1.type, x2.type)
+        self.type = tys.Type.max(x1.type, x2.type)
         if self.type == None:
             self.error("type error")
 
@@ -129,7 +127,7 @@ class Unary(Op):
     def __init__(self, tok, expr):
         super(Unary, self).__init__(tok, None)
         self.expr = expr
-        self.type = type.Type.max(Type.INT, expr.Type)
+        self.type = tys.Type.max(tys.INT, expr.Type)
         if self.type == None:
             self.error("type error")
 
@@ -167,7 +165,7 @@ class Constant(Expr):
         if i == None:
             super(Constant, self).__init__(tok, ty)
         else:
-            super(Constant, self).__init__(lexer.Num(i), Type.INT)
+            super(Constant, self).__init__(lexer.Num(i), tys.INT)
 
     def jumping(self, t, f):
         if self == TRUE and t != 0:
@@ -175,8 +173,8 @@ class Constant(Expr):
         elif self == FALSE and f != 0:
             self.emit("goto L" + f)
 
-TRUE    = Constant(tok = lexer.TRUE, ty = type.BOOL)
-FALSE   = Constant(tok = lexer.FALSE, ty = type.BOOL)
+TRUE    = Constant(tok = lexer.TRUE, ty = tys.BOOL)
+FALSE   = Constant(tok = lexer.FALSE, ty = tys.BOOL)
 
 #the top class of logical operations
 class Logical(Expr):
@@ -191,8 +189,8 @@ class Logical(Expr):
             self.error("type error")
 
     def check(self, ty1, ty2):
-        if ty1 == type.BOOL and ty2 == type.BOOL:
-            return type.BOOL
+        if ty1 == tys.BOOL and ty2 == tys.BOOL:
+            return tys.BOOL
         return None
 
     def gen(self):
@@ -266,6 +264,15 @@ class Rel(Logical):
     def __init__(self, tok, x1, x2):
         super(Rel, self).__init__(tok, x1, x2)
 
+    def check(self, ty1, ty2):
+        if type(ty1) == (tys.Array) or type(ty2) == (tys.Array):
+            return None
+        elif ty1 == ty2:
+            return tys.BOOL
+        else:
+            return None
+
+
     def jumping(self, t, f):
         a = self.exp1.reduce()
         b = self.exp2.reduce()
@@ -273,10 +280,7 @@ class Rel(Logical):
         self.emitjumps(test, t, f)
 
 
-    #the top class of statement constructoin
-
-
-
+#the top class of statement constructoin
 class Stmt(Node):
     """Stmt"""
     def __init__(self):
@@ -297,7 +301,7 @@ class If(Stmt):
         super(If, self).__init__()
         self.expr = expr
         self.stmt = stmt
-        if expr.type != Type.BOOL:
+        if expr.type != tys.BOOL:
             expr.error("boolean required in if")
 
     def gen(self, b, a):
@@ -315,7 +319,7 @@ class Else(Stmt):
         self.expr = expr
         self.stmt1 = stmt1
         self.stmt2 = stmt2
-        if expr.type != Type.BOOL:
+        if expr.type != tys.BOOL:
             expr.error("boolean required in if")
 
     def gen(self, b, a):
@@ -340,7 +344,7 @@ class While(Stmt):
     def init(self, expr, stmt):
         self.expr = expr
         self.stmt = stmt
-        if expr.type != type.BOOL:
+        if expr.type != tys.BOOL:
             expr.error("boolean required in while")
 
     def gen(self, b, a):
@@ -383,9 +387,9 @@ class Set(Stmt):
             self.error("type error")
 
     def check(self, p1, p2):
-        if type.Type.numeric(p1) and type.Type.numeric(p2):
+        if tys.Type.numeric(p1) and tys.Type.numeric(p2):
             return p2
-        elif p1 == type.BOOL and p2 == type.BOOL:
+        elif p1 == tys.BOOL and p2 == tys.BOOL:
             return p2
         else:
             return None
@@ -406,11 +410,11 @@ class SetElem(Stmt):
             self.error("type error")
 
     def check(self, p1, p2):
-        if type(p1) == type.Array or type(p2) == type.Array:
+        if type(p1) == tys.Array or type(p2) == tys.Array:
             return None
         elif p1 == p2:
             return p2
-        elif Type.numeric(p1) and Type.numeric(p2):
+        elif tys.Type.numeric(p1) and tys.Type.numeric(p2):
             return p2
         else:
             return None

@@ -1,4 +1,4 @@
-import type
+import tys
 import lexer
 import inter
 
@@ -41,7 +41,7 @@ class Parser(object):
     def block(self):
         self.match('{')
         savedEnv = self.top
-        self.top = type.Enviroment(self.top)
+        self.top = tys.Enviroment(self.top)
         self.decls()
         s = self.stmts()
         self.match('}')
@@ -73,11 +73,11 @@ class Parser(object):
         self.match(']')
         if self.look.tag == '[':
             ty = self.dims(ty)
-        return type.Array(tok.value, ty)
+        return tys.Array(tok.value, ty)
 
     def stmts(self):
         if self.look.tag == '}':
-            return inter.Stmt.Null
+            return inter.Null
         else:
             return inter.Seq(self.stmt(), self.stmts())
 
@@ -167,6 +167,7 @@ class Parser(object):
             tok = self.look
             self.move()
             x = inter.And(tok, x, self.equality())
+        return x
 
     def equality(self):
         x = self.rel()
@@ -174,6 +175,7 @@ class Parser(object):
             tok = self.look
             self.move()
             x = inter.Rel(tok, x, self.rel())
+        return x
 
     def rel(self):
         x = self.expr()
@@ -181,7 +183,7 @@ class Parser(object):
             tok = self.look
             self.move()
             return inter.Rel(tok, x, self.expr())
-
+        return x
     def expr(self):
         x = self.term()
         while self.look.tag == '+' or self.look.tag == '-':
@@ -196,7 +198,7 @@ class Parser(object):
             tok = self.look
             self.move()
             x = inter.Arith(tok, x, self.unary())
-
+        return x
     def unary(self):
         if self.look.tag == '-':
             self.move()
@@ -216,11 +218,11 @@ class Parser(object):
             self.match('}')
             return x
         elif self.look.tag == lexer.Tag.NUM:
-            x = inter.Constant(self.look, type.INT)
+            x = inter.Constant(tok = self.look, ty = tys.INT)
             self.move()
             return x
         elif self.look.tag == lexer.Tag.REAL:
-            x = lexer.Real(self.look, type.FLOAT)
+            x = lexer.Real(self.look, tys.FLOAT)
             self.move()
             return x
         elif self.look.tag == lexer.Tag.TRUE:
@@ -266,9 +268,9 @@ class Parser(object):
 
 
 if __name__ == '__main__':
-    lexer = lexer.Lexer("{int a;}")
-    parser= Parser(lexer)
-    pro   = parser.program()
+    lex = lexer.Lexer("{int a; a = 1; if (a >= 1) { a = 0;} }")
+    par = Parser(lex)
+    pro = par.program()
     print("ok")
 
 

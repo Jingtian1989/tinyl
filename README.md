@@ -1,6 +1,6 @@
 ## A Python Version Of The Dragon Book's Front End
 
-## The Grammer
+### The Grammer
 
 	program	->	block
 	block 	->	{ decls stmts }

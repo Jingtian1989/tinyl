@@ -1,6 +1,8 @@
-## A Python Version Of The Dragon Book's Front End
+# tinyl
 
-### The Grammer
+A python version of the dragon book's front end.
+
+## The Grammer
 
 	program	->	block
 	block 	->	{ decls stmts }

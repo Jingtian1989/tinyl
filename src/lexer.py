@@ -76,23 +76,20 @@ NE 	    = Word("!=", Tag.NE)
 LE 	    = Word("<=", Tag.LE)
 GE      = Word(">=", Tag.GE)
 
-MINUS   = Word("minus", 	Tag.MINUS)
+MINUS   = Word("minus", Tag.MINUS)
 TRUE    = Word("true", 	Tag.TRUE)
 FALSE   = Word("false",	Tag.FALSE)
-TEMP    = Word("t", 		Tag.TEMP)
+TEMP    = Word("t", 	Tag.TEMP)
 
 class Lexer(object):
-
-
-
 	"""Lexer"""
 	line = 1
 
 	def __init__(self, text):
 		super(Lexer, self).__init__()
-		self.peek = ' '
-		self.words = dict()
-		self.text = text
+		self.peek   = ' '
+		self.words  = dict()
+		self.text   = text
 		self.cursor = 0
 		
 		#reserve key words
@@ -134,9 +131,9 @@ class Lexer(object):
 			self.peek = self.text[self.cursor]
 			self.cursor = self.cursor + 1
 		else:
-			raise EOFError
+			self.peek = None
 
-	def __readchar(self, c):
+	def __readcharc(self, c):
 		self.__readchar()
 		if self.peek != c:
 			return False
@@ -149,34 +146,33 @@ class Lexer(object):
 			self.__readchar()
 
 		if self.peek == '&':
-			if self.__readchar('&'): 
-				return Word.AND
+			if self.__readcharc('&'):
+				return AND
 			else:
 				return Token('&')
-
 		elif self.peek == '|':
-			if self.__readchar('|'):
-				return Word.OR
+			if self.__readcharc('|'):
+				return OR
 			else:
 				return Token('|')
 		elif self.peek == '=':
-			if self.__readchar('='):
-				return Word.EQ
+			if self.__readcharc('='):
+				return EQ
 			else:
 				return Token('=')
 		elif self.peek == '!':
-			if self.__readchar('='):
-				return Word.NE
+			if self.__readcharc('='):
+				return NE
 			else:
 				return Token('!')
 		elif self.peek == '<':
-			if self.__readchar('='):
-				return Word.LE
+			if self.__readcharc('='):
+				return LE
 			else:
 				return Token('<')
 		elif self.peek == '>':
-			if self.__readchar('='):
-				return Word.GE
+			if self.__readcharc('='):
+				return GE
 			else:
 				return Token('>')
 		

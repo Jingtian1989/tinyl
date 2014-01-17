@@ -8,10 +8,12 @@ class Parser(object):
 
     def __init__(self, lexer):
         super(Parser, self).__init__()
-        self.lexer = lexer #lexical analyzer for this parser
-        self.look = None  #lookahead tagen
-        self.top = None  #current or top symbol table
-        self.used = 0       #storage used for declarations
+        self.lexer  = lexer
+        self.look   = None
+        #current or top symbol table
+        self.top    = None
+        #storage used for declarations
+        self.used   = 0
 
         self.move()
 
@@ -22,31 +24,32 @@ class Parser(object):
         raise Exception("error at line : %d, %s." % (self.lexer.line, s))
 
     def match(self, t):
-        if self.look == t:
+        if self.look.tag == t:
             self.move()
         else:
             self.error("syntax error")
 
     def program(self):
         s = self.block()
-        begin = s.newlabel()
-        after = s.newlabel()
-        s.emitlabel(begin)
-        s.gen(begin, after)
-        s.emitlabel(after)
+#        begin = s.newlabel()
+#        after = s.newlabel()
+#        s.emitlabel(begin)
+#        s.gen(begin, after)
+#        s.emitlabel(after)
+        return s
 
     def block(self):
-        self.match("{")
+        self.match('{')
         savedEnv = self.top
         self.top = type.Enviroment(self.top)
         self.decls()
         s = self.stmts()
-        self.match("}")
+        self.match('}')
         self.top = savedEnv
         return s
 
     def decls(self):
-        while self.look == lexer.Tag.BASIC:
+        while self.look.tag == lexer.Tag.BASIC:
             ty = self.type()
             tok = self.look
             self.match(lexer.Tag.ID)
@@ -58,7 +61,7 @@ class Parser(object):
     def type(self):
         ty = self.look
         self.match(lexer.Tag.BASIC)
-        if self.look != '[':
+        if self.look.tag != '[':
             return ty
         else:
             return self.dims(ty)
@@ -73,7 +76,7 @@ class Parser(object):
         return type.Array(tok.value, ty)
 
     def stmts(self):
-        if self.look == '}':
+        if self.look.tag == '}':
             return inter.Stmt.Null
         else:
             return inter.Seq(self.stmt(), self.stmts())
@@ -81,7 +84,7 @@ class Parser(object):
     def stmt(self):
         if self.look.tag == ';':
             self.move()
-            return inter.Stmt.Null
+            return inter.Null
 
         elif self.look.tag == lexer.Tag.IF:
             self.match(lexer.Tag.IF)
@@ -97,21 +100,21 @@ class Parser(object):
 
         elif self.look.tag == lexer.Tag.WHILE:
             whilenode = inter.While()
-            savedStmt = inter.Stmt.Enclosing
-            inter.Stmt.Enclosing = whilenode
+            savedStmt = inter.Enclosing
+            inter.Enclosing = whilenode
             self.match(lexer.Tag.WHILE)
             self.match('(')
             x = self.bool()
             self.match(')')
             s1 = self.stmt()
             whilenode.init(x, s1)
-            inter.Stmt.Enclosing = savedStmt
+            inter.Enclosing = savedStmt
             return whilenode
 
         elif self.look.tag == lexer.Tag.DO:
             donode = inter.Do()
             savedStmt = inter.Stmt.Enclosing
-            lexer.Stmt.Enclosing = donode
+            lexer.Enclosing = donode
             self.match(lexer.Tag.DO)
             s1 = self.stmt()
             self.match(lexer.Tag.WHILE)
@@ -120,17 +123,16 @@ class Parser(object):
             self.match(')')
             self.match(';')
             donode.init(s1, x)
-            inter.Stmt.Enclosing = savedStmt
+            inter.Enclosing = savedStmt
             return donode
 
         elif self.look.tag == lexer.Tag.BREAK:
-            self.match(lexer.Tag.BREAK);
+            self.match(lexer.Tag.BREAK)
             self.match(';')
             return inter.Break()
 
         elif self.look.tag == '{':
             return self.block()
-
         else:
             return self.assign()
 
@@ -217,11 +219,11 @@ class Parser(object):
             x = inter.Constant(self.look, type.INT)
             self.move()
             return x
-        elif self.look.tag == lexer.REAL:
+        elif self.look.tag == lexer.Tag.REAL:
             x = lexer.Real(self.look, type.FLOAT)
             self.move()
             return x
-        elif self.look.tag == lexer.TRUE:
+        elif self.look.tag == lexer.Tag.TRUE:
             x = inter.TRUE
             self.move()
             return x
@@ -247,7 +249,7 @@ class Parser(object):
         self.match('[')
         i = self.bool()
         self.match(']')
-        ty = type.of
+        ty = ty.of
         w = inter.Constant(i = ty.width)
         t1 = inter.Arith(lexer.Token('*'), i, w)
         loc = t1
@@ -261,5 +263,12 @@ class Parser(object):
             t2 = inter.Arith(lexer.Token('+'), loc, t1)
             loc = t2
         return inter.Access(id, loc, ty)
+
+
+if __name__ == '__main__':
+    lexer = lexer.Lexer("{int a;}")
+    parser= Parser(lexer)
+    pro   = parser.program()
+    print("ok")
 
 

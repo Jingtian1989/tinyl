@@ -1,0 +1,213 @@
+from type import *
+# 词法单元对应的常量
+class Tag(object):
+	"""Tag"""
+	AND 	= 256
+	BASIC 	= 257
+	BREAK 	= 258
+	DO		= 259
+	ELSE 	= 260
+	EQ 		= 261
+	FALSE	= 262
+	GE		= 263
+	ID 		= 264
+	IF		= 265
+	INDEX	= 266
+	LE		= 267
+	MINUS	= 268
+	NE		= 269
+	NUM		= 270
+	OR		= 271
+	REAL	= 272
+	TEMP	= 273
+	TRUE	= 274
+	WHILE	= 275
+
+#所有词法单元的父类
+class Token(object):
+	"""Token"""
+	def __init__(self, tag):
+		super(Token, self).__init__()
+		#tag字段用于做出语法分析的决定
+		self.tag = tag
+		
+	def __str__(self):
+		return str(self.tag)
+
+#保留关键字和标识符的词法单元
+class Word(Token):
+	"""Word"""
+	AND = Word("&&", Tag.AND)
+	OR 	= Word("||", Tag.OR)
+	EQ 	= Word("==", Tag.EQ)
+	NE 	= Word("!=", Tag.NE)
+	LE 	= Word("<=", Tag.LE)
+	GE  = Word(">=", Tag.GE)
+
+	MINUS = Word("minus", 	Tag.MINUS)
+	TRUE  = Word("true", 	Tag.TRUE)
+	FALSE = Word("false",	Tag.FALSE)
+	TEMP  = Word("t", 		Tag.TEMP)
+
+	
+	def __init__(self, lexeme, tag):
+		super(Word, self).__init__(tag)
+		self.lexeme = lexeme
+		
+	def __str__(self):
+		return self.lexeme
+
+
+class Real(Token):
+	"""Real"""
+	def __init__(self, v):
+		super(Real, self).__init__(Tag.REAL)
+		self.value = v
+
+	def __str__(self):
+		return str(self.value)
+
+
+#保留整数的词法单元
+class Num(Token):
+	"""Num"""
+	def __init__(self, v):
+		super(Num, self).__init__(Tag.NUM)
+		self.value = v
+
+	def __str__(self):
+		return str(self.value)
+
+
+
+class Lexer(object):
+
+	"""Lexer"""
+	line = 1
+
+	def __init__(self, text):
+		super(Lexer, self).__init__()
+		self.peek = ' '
+		self.words = dict()
+		self.text = text
+		self.cursor = 0
+		
+		#key words
+		self.reserve(Word("if", Tag.IF))
+		self.reserve(Word("else", Tag.ELSE))
+		self.reserve(Word("while", Tag.WHILE))
+		self.reserve(Word("do", Tag.DO))
+		self.reserve(Word("break", Tag.BREAK))
+
+		self.reserve(Word.TRUE)
+		self.reserve(Word.FALSE)
+
+		self.reserve(Type.INT)
+		self.reserve(Type.CHAR)
+		self.reserve(Type.BOOL)
+		self.reserve(Type.FLOAT)
+
+
+
+	def isdigit(self, v):
+		if v >= '0' and v <= '9':
+			return True
+		return False
+
+	def isletter(self, v):
+		if (v >= 'a' and v <= 'z') or (v >= 'A' and v <= 'Z'):
+			return True
+		return False
+
+	def isletterOrdigit(self, v):
+		return self.isletter(v) or self.isdigit(v)
+
+
+	def reserve(self, word):
+		self.words[word.lexeme] = word
+
+	
+	def __readchar(self):
+		if self.cursor < len(self.text):
+			self.peek = self.text[self.cursor]
+			self.cursor = self.cursor + 1
+		else:
+			raise EOFError
+
+	def __readchar(self, c):
+		self.__readchar()
+		if self.peek != c:
+			return False
+		self.peek = ' '
+		return True
+	def scan(self):
+		while self.peek == ' ' or self.peek == '\t' or self.peek == '\n':
+			if self.peek == '\n':
+				self.line = self.line + 1
+			self.__readchar()
+
+		if self.peek == '&':
+			if self.__readchar('&'): 
+				return Word.AND
+			else:
+				return Token('&')
+
+		elif self.peek == '|':
+			if self.__readchar('|'):
+				return Word.OR
+			else:
+				return Token('|')
+		elif self.peek == '=':
+			if self.__readchar('='):
+				return Word.EQ
+			else:
+				return Token('=')
+		elif self.peek == '!':
+			if self.__readchar('='):
+				return Word.NE
+			else:
+				return Token('!')
+		elif self.peek == '<':
+			if self.__readchar('='):
+				return Word.LE
+			else:
+				return Token('<')
+		elif self.peek == '>':
+			if self.__readchar('='):
+				return Word.GE
+			elif:
+				return Token('>')
+		
+		if self.isdigit(self.peek):
+			v = 0
+			while self.isdigit(self.peek):
+				v = 10 * v + int(self.peek)
+				self.__readchar()
+			if self.peek != '.':
+				return Num(v)
+			
+			x = float(v)
+			d = float(10)
+			while True:
+				self.__readchar()
+				if self.isdigit(self.peek) is not True:
+					break
+				x = x + int(self.peek)/d
+				d = d * 10
+			return Real(x)
+
+		if self.isletter(self.peek):
+			s = ""
+			while self.isletterOrdigit(self.peek):
+				s += self.peek
+				self.__readchar()
+			if self.words.get(s) is not None:
+				return self.words.get(s)
+			w = Word(s, Tag.ID)
+			self.words[s] = w
+			return w
+
+		tok = Token(self.peek)
+		self.peek = ' '
+		return tok	
+	

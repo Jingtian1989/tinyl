@@ -31,11 +31,11 @@ class Parser(object):
 
     def program(self):
         s = self.block()
-#        begin = s.newlabel()
-#        after = s.newlabel()
-#        s.emitlabel(begin)
-#        s.gen(begin, after)
-#        s.emitlabel(after)
+        begin = s.newlabel()
+        after = s.newlabel()
+        s.emitlabel(begin)
+        s.gen(begin, after)
+        s.emitlabel(after)
         return s
 
     def block(self):
@@ -270,24 +270,24 @@ class Parser(object):
 if __name__ == '__main__':
     lex = lexer.Lexer(\
         "{"
-            "int a; "
-            "a = 1;"
-            " if (a >= 1)"
-            " {"
-            "    a = 0;"
-            " }"
-            "while (a != 1)"
-            "{"
-            "   a = a + 1;"
-            "}"
-            "if (a >= 0)"
-            "{"
-            "   a = a / 2;"
-            "   a = a * 2;"
-            "}else"
-            "{"
-            "   a = a + a;"
-            "}"
+            # "int a; "
+            # "a = 1;"
+            # " if (a >= 1)"
+            # " {"
+            # "    a = 0;"
+            # " }"
+            # "while (a != 1)"
+            # "{"
+            # "   a = a + 1;"
+            # "}"
+            # "if (a >= 0)"
+            # "{"
+            # "   a = a / 2;"
+            # "   a = a * 2;"
+            # "}else"
+            # "{"
+            # "   a = a + a;"
+            # "}"
             "int[64] b;"
             "b[0] = b[1];"
         " }")

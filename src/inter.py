@@ -16,8 +16,8 @@ class Node(object):
         raise Exception("error at line : %d, %s." % (self.lexline, s))
 
     def newlabel(self):
-        self.labels = self.labels + 1
-        return self.labels
+        Node.labels = Node.labels + 1
+        return Node.labels
 
     def emitlabel(self, i):
         print("L" + str(i) + ":")
@@ -54,12 +54,12 @@ class Expr(Node):
 
     def emitjumps(self, test, t, f):
         if t != 0 and f != 0:
-            self.emit("if " + test + "goto L" + t)
-            self.emit("goto L" + f)
+            self.emit("if " + test + " goto L" + str(t))
+            self.emit("goto L" + str(f))
         elif t != 0:
-            self.emit("if " + test + "goto L" + t)
+            self.emit("if " + test + " goto L" + str(t))
         elif f != 0:
-            self.emit("iffalse " + test + "goto L" + f)
+            self.emit("iffalse " + test + " goto L" + str(f))
 
 
     def __str__(self):
@@ -81,8 +81,8 @@ class Temp(Expr):
 
     def __init__(self, ty):
         super(Temp, self).__init__(lexer.TEMP, ty)
-        self.count = self.count + 1
-        self.number = self.count
+        Temp.count = Temp.count + 1
+        self.number = Temp.count
 
     def __str__(self):
         return "t" + str(self.number)
@@ -328,9 +328,9 @@ class Else(Stmt):
         self.expr.jumping(0, label2)
         self.emitlabel(label1)
         self.stmt1.gen(label1, a)
-        self.emit("goto L" + a)
+        self.emit("goto L" + str(a))
         self.emitlabel(label2)
-        self.stmt2.gen(label2, a)
+        self.stmt2.gen(label2, str(a))
 
 
 class While(Stmt):

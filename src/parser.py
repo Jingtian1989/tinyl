@@ -187,7 +187,7 @@ class Parser(object):
     def expr(self):
         x = self.term()
         while self.look.tag == '+' or self.look.tag == '-':
-            tok = self.look.tok
+            tok = self.look
             self.move()
             x = inter.Arith(tok, x, self.term())
         return x
@@ -268,7 +268,29 @@ class Parser(object):
 
 
 if __name__ == '__main__':
-    lex = lexer.Lexer("{int a; a = 1; if (a >= 1) { a = 0;} }")
+    lex = lexer.Lexer(\
+        "{"
+            "int a; "
+            "a = 1;"
+            " if (a >= 1)"
+            " {"
+            "    a = 0;"
+            " }"
+            "while (a != 1)"
+            "{"
+            "   a = a + 1;"
+            "}"
+            "if (a >= 0)"
+            "{"
+            "   a = a / 2;"
+            "   a = a * 2;"
+            "}else"
+            "{"
+            "   a = a + a;"
+            "}"
+            "int[64] b;"
+            "b[0] = b[1];"
+        " }")
     par = Parser(lex)
     pro = par.program()
     print("ok")

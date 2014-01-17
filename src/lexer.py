@@ -1,5 +1,6 @@
-from type import *
-# 词法单元对应的常量
+import type
+
+#constants of the lexical unit
 class Tag(object):
 	"""Tag"""
 	AND 	= 256
@@ -23,33 +24,20 @@ class Tag(object):
 	TRUE	= 274
 	WHILE	= 275
 
-#所有词法单元的父类
+#top class of lexical unit
 class Token(object):
 	"""Token"""
 	def __init__(self, tag):
 		super(Token, self).__init__()
-		#tag字段用于做出语法分析的决定
+		#help make grammer descision
 		self.tag = tag
 		
 	def __str__(self):
 		return str(self.tag)
 
-#保留关键字和标识符的词法单元
+#key words and identifier
 class Word(Token):
 	"""Word"""
-	AND = Word("&&", Tag.AND)
-	OR 	= Word("||", Tag.OR)
-	EQ 	= Word("==", Tag.EQ)
-	NE 	= Word("!=", Tag.NE)
-	LE 	= Word("<=", Tag.LE)
-	GE  = Word(">=", Tag.GE)
-
-	MINUS = Word("minus", 	Tag.MINUS)
-	TRUE  = Word("true", 	Tag.TRUE)
-	FALSE = Word("false",	Tag.FALSE)
-	TEMP  = Word("t", 		Tag.TEMP)
-
-	
 	def __init__(self, lexeme, tag):
 		super(Word, self).__init__(tag)
 		self.lexeme = lexeme
@@ -57,7 +45,7 @@ class Word(Token):
 	def __str__(self):
 		return self.lexeme
 
-
+#float
 class Real(Token):
 	"""Real"""
 	def __init__(self, v):
@@ -68,7 +56,7 @@ class Real(Token):
 		return str(self.value)
 
 
-#保留整数的词法单元
+#integer
 class Num(Token):
 	"""Num"""
 	def __init__(self, v):
@@ -80,7 +68,22 @@ class Num(Token):
 
 
 
+#operators
+AND     = Word("&&", Tag.AND)
+OR 	    = Word("||", Tag.OR)
+EQ 	    = Word("==", Tag.EQ)
+NE 	    = Word("!=", Tag.NE)
+LE 	    = Word("<=", Tag.LE)
+GE      = Word(">=", Tag.GE)
+
+MINUS   = Word("minus", 	Tag.MINUS)
+TRUE    = Word("true", 	Tag.TRUE)
+FALSE   = Word("false",	Tag.FALSE)
+TEMP    = Word("t", 		Tag.TEMP)
+
 class Lexer(object):
+
+
 
 	"""Lexer"""
 	line = 1
@@ -92,21 +95,20 @@ class Lexer(object):
 		self.text = text
 		self.cursor = 0
 		
-		#key words
+		#reserve key words
 		self.reserve(Word("if", Tag.IF))
 		self.reserve(Word("else", Tag.ELSE))
 		self.reserve(Word("while", Tag.WHILE))
 		self.reserve(Word("do", Tag.DO))
 		self.reserve(Word("break", Tag.BREAK))
 
-		self.reserve(Word.TRUE)
-		self.reserve(Word.FALSE)
+		self.reserve(TRUE)
+		self.reserve(FALSE)
 
-		self.reserve(Type.INT)
-		self.reserve(Type.CHAR)
-		self.reserve(Type.BOOL)
-		self.reserve(Type.FLOAT)
-
+		self.reserve(type.INT)
+		self.reserve(type.CHAR)
+		self.reserve(type.BOOL)
+		self.reserve(type.FLOAT)
 
 
 	def isdigit(self, v):
@@ -175,7 +177,7 @@ class Lexer(object):
 		elif self.peek == '>':
 			if self.__readchar('='):
 				return Word.GE
-			elif:
+			else:
 				return Token('>')
 		
 		if self.isdigit(self.peek):

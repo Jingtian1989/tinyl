@@ -1,8 +1,6 @@
 import lexer
 import tys
 #AST node
-
-
 class Node(object):
     """Node"""
     labels = 0
@@ -25,7 +23,7 @@ class Node(object):
     def emit(self, s):
         print('\t' + s)
 
-#experation construction
+#expression construction
 class Expr(Node):
     """Expr"""
 
@@ -36,17 +34,17 @@ class Expr(Node):
         #type
         self.type = ty
 
-    #return an node that represent the experation
-    #ie.E=E1+E2, it returns a expertaoin x1+x2, that x1, x2 contains the value of the e1 and e2.
+    #return an node that represent the expression
+    #ie.E=E1+E2, it returns a expression x1+x2, that x1, x2 contains the value of the e1 and e2.
     def gen(self, b = None, a = None):
         return self
 
-    #reduce a experatoin to a node, that contains the value of the experation
+    #reduce a experatoin to a node, that contains the value of the expression
     #ie. E, it returns a temp that contains the value of E.
     def reduce(self):
         return self
 
-    #generate jump code for boolean experation
+    #generate jump code for boolean expression
     #t and f represent the labels of the true and false exits
     #the special label 0 represents that past the control flow of B, goto the next instruction behind B.
     def jumping(self, t, f):
@@ -107,7 +105,6 @@ class Arith(Op):
 
     def __init__(self, tok, x1, x2):
         super(Arith, self).__init__(tok, None)
-        self.tok = tok
         self.exp1 = x1
         self.exp2 = x2
         self.type = tys.Type.max(x1.type, x2.type)
@@ -127,7 +124,7 @@ class Unary(Op):
     def __init__(self, tok, expr):
         super(Unary, self).__init__(tok, None)
         self.expr = expr
-        self.type = tys.Type.max(tys.INT, expr.Type)
+        self.type = tys.Type.max(tys.INT, expr.type)
         if self.type == None:
             self.error("type error")
 
@@ -155,9 +152,6 @@ class Access(Op):
 
     def __str__(self):
         return str(self.array) + "[" + str(self.index) + "]"
-
-
-
 
 class Constant(Expr):
     """Constant"""
@@ -202,7 +196,7 @@ class Logical(Expr):
         self.emit("goto L" + str(a))
         self.emitlabel(f)
         self.emit(str(temp) + " = false")
-        self.emit(a)
+        self.emitlabel(a)
         return temp
 
     def __str__(self):
@@ -272,13 +266,11 @@ class Rel(Logical):
         else:
             return None
 
-
     def jumping(self, t, f):
         a = self.exp1.reduce()
         b = self.exp2.reduce()
         test = str(a) + " " + str(self.op) + " " + str(b)
         self.emitjumps(test, t, f)
-
 
 #the top class of statement constructoin
 class Stmt(Node):
@@ -310,7 +302,6 @@ class If(Stmt):
         self.emitlabel(label)
         self.stmt.gen(label, a)
 
-
 class Else(Stmt):
     """Else"""
 
@@ -330,7 +321,7 @@ class Else(Stmt):
         self.stmt1.gen(label1, a)
         self.emit("goto L" + str(a))
         self.emitlabel(label2)
-        self.stmt2.gen(label2, str(a))
+        self.stmt2.gen(label2, a)
 
 
 class While(Stmt):
@@ -354,7 +345,6 @@ class While(Stmt):
         self.emitlabel(label)
         self.stmt.gen(label, b)
         self.emit("goto L" + str(b))
-
 
 class Do(Stmt):
     """Do"""
@@ -424,7 +414,6 @@ class SetElem(Stmt):
         s2 = str(self.expr.reduce())
         self.emit(str(self.array) + " [ " + s1 + " ] = " + s2)
 
-
 #statement sequence
 class Seq(Stmt):
     """Seq"""
@@ -435,9 +424,9 @@ class Seq(Stmt):
         self.stmt2 = stmt2
     #null statement do not generate instructions
     def gen(self, b, a):
-        if self.stmt1 == Null:
+        if self.stmt1 == None:
             self.stmt2.gen(b, a)
-        elif self.stmt2 == Null:
+        elif self.stmt2 == None:
             self.stmt1.gen(b, a)
         else:
             label = self.newlabel()
@@ -445,13 +434,12 @@ class Seq(Stmt):
             self.emitlabel(label)
             self.stmt2.gen(label, a)
 
-
 class Break(Stmt):
     """Break"""
 
     def __init__(self):
         super(Break, self).__init__()
-        if Enclosing == Null:
+        if Enclosing == None:
             self.error("unenclosed break")
             #keep track of the outer ring
         self.stmt = Enclosing

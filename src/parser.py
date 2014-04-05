@@ -114,7 +114,7 @@ class Parser(object):
         elif self.look.tag == lexer.Tag.DO:
             donode = inter.Do()
             savedStmt = inter.Stmt.Enclosing
-            lexer.Enclosing = donode
+            inter.Enclosing = donode
             self.match(lexer.Tag.DO)
             s1 = self.stmt()
             self.match(lexer.Tag.WHILE)
@@ -215,7 +215,7 @@ class Parser(object):
         if self.look.tag == '(':
             self.move()
             x = self.bool()
-            self.match('}')
+            self.match(')')
             return x
         elif self.look.tag == lexer.Tag.NUM:
             x = inter.Constant(tok = self.look, ty = tys.INT)

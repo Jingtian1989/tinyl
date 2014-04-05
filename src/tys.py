@@ -14,7 +14,7 @@ class Type(lexer.Word):
         if clz.numeric(p1) == False or clz.numeric(p2) == False:
             return None
         elif p1 == FLOAT or p2 == FLOAT:
-            return clz.FLOAT
+            return FLOAT
         elif p1 == INT or p2 == INT:
             return INT
         else:

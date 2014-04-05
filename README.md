@@ -1,6 +1,6 @@
 # tinyl
 
-A python version of the dragon book's front end.
+	tinyl is a python version of the dragon book's front end.
 
 ## The Grammer
 
